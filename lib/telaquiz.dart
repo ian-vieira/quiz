@@ -9,10 +9,16 @@ class QuizPage extends StatefulWidget {
 class _QuizPageState extends State<QuizPage> {
   int _currentQuestionIndex = 0;
   int _score = 0;
-  bool _answered = false; // Para verificar se a pergunta foi respondida
-  int? _selectedAnswerIndex; // Índice da resposta selecionada
-  late Timer _timer; // Timer para controlar o tempo de resposta
-  int _timeLeft = 20; // Tempo restante para a questão (inicialmente 20 segundos)
+  int _correctAnswers = 0; // Contador de acertos
+  int _bonusPoints = 0; // Pontos bônus baseados no tempo
+  bool _answered = false;
+  int? _selectedAnswerIndex;
+  late Timer _timer;
+  int _timeLeft = 20;
+
+  // Questões do quiz...
+
+
 
   final List<Map<String, dynamic>> _questions = [
     {
@@ -24,17 +30,17 @@ class _QuizPageState extends State<QuizPage> {
   },
       {
     'question': 'Qual é o valor de π (Pi) com 4 casas decimais?',
-    'options': ['3.142', '3.1416', '3.1415', '3.1432'],
+    'options': ['3.1421', '3.1416', '3.1415', '3.1432'],
     'answer': 2,
     'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmG0Sbobcd8Gc-cwgSpC5cKIcw5hlhvYhXbw&s',
     'difficulty': 'medium',
   },
     {
-      'question': 'Quantos continentes existem na Terra?',
-      'options': ['7', '6', '5', '8'],
-      'answer': 0,
-      'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0HVK-6SQ-YqPR8SLV5kQJ4Wxy6BZjlwemdg&s',
-      'difficulty': 'easy',
+      'question': 'Qual dos cálculos abaixo representa o cálculo de juros composto',
+      'options': ['M = C * (1 + i)^t²', 'M = C * (1 + i)^t', 'M = C² * (1 + i)^t', 'M = C * (0,1 + i)^t'],
+      'answer': 1,
+      'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRImXZkQGP3u9-bDeL3qkudMnHNLrDMf1ohWg&s',
+      'difficulty': 'medium',
       },
     {
       'question': 'qual o log de 100 na base 10',
@@ -45,24 +51,24 @@ class _QuizPageState extends State<QuizPage> {
       },
     {
       'question': 'quem é o melhor piloto atual da f1?',
-      'options': ['Max', 'Dando Molis', 'Stroll', 'Checo'],
+      'options': ['Max Verstappen', 'Dando Molis', 'Lance Stroll', 'Checo Perez'],
       'answer': 0,
       'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhUaAz4JZDNR9yycCeXsW6NRzM5lu2PoLmQA&s',
       'difficulty': 'medium',
       },
     {
-      'question': 'qual é a raiz de 144?',
-      'options': ['11', '12', '13', '14'],
-      'answer': 1,
-      'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKJMHp3N8p6xg-VKiSzjMs1fI8TTYZaACiIg&s',
+      'question': 'Supondo que a linha azul seja o valor das ações da empresa Ian S.A, Em qual momento houve a melhor hora de compra dessas ações?',
+      'options': ['entre o 2º e o 3º periodo', 'entre o 3º e o 4º periodo', 'entre o 4º e o 5º periodo', 'entre o 5º e o 6º periodo'],
+      'answer': 3,
+      'imageUrl': 'https://images.datacamp.com/image/upload/v1680170287/image10_ed33f6d41e.png',
       'difficulty': 'easy',
       },
     {
       'question': 'Qual das frases possui predicativo verbal?',
-      'options': ['dida é perverso', 'Katarina vive cansada', 'ian é lindo♥', 'Ariel trouxe pedra'],
+      'options': ['dida é perverso', 'Caique vive cansado', 'ian é lindo♥', 'Ariel trouxe pedra'],
       'answer': 3,
       'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQk8Au3rCYtpuiiIb8pzaM5BfoQnv8g806KnA&s',
-      'difficulty': 'medium',
+      'difficulty': 'easy',
       },
     {
       'question': 'Que carro é esse?',
@@ -86,7 +92,7 @@ class _QuizPageState extends State<QuizPage> {
       'difficulty': 'medium',
       },
       {
-      'question': 'Nome dado a uma estrela, que supostamente é orbitada por coletores de energia, é:',
+      'question': 'Nome dado a uma estrela que supostamente é orbitada por coletores de energia é:',
       'options': ['Estrela Quantica', 'Electrica Vim Stellam', 'Estrela de Dyson', 'N.D.A'],
       'answer': 2,
       'imageUrl': 'https://earthsky.org/upl/2018/08/Dyson-sphere-Kevin-Gill-Wiki-Commons-sq.png',
@@ -100,7 +106,7 @@ class _QuizPageState extends State<QuizPage> {
       'difficulty': 'medium',
       },
       {
-      'question': 'Se os catetos do triângulo acima equivale a 7 e 3, qual é o valor da hipotenusa ,aproximadamente: ("x" representa o valor da hipotenusa)',
+      'question': 'Se os catetos do triângulo acima equivale a 7 e 3, qual é o valor aproximado da hipotenusa : ("x" representa o valor da hipotenusa)',
       'options': ['7<x<8', '8<x<9', 'x = 7,3', 'x = 6,67'],
       'answer': 0,
       'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNSda7mjMU29urZ6b6kH-P9hMAb-S2oekCtg&s',
@@ -116,12 +122,12 @@ class _QuizPageState extends State<QuizPage> {
       {
       'question': 'O nome do processo de reprodução celular representado acima é:',
       'options': ['Difusão', 'Meiose', 'citose', 'Mitose'],
-      'answer': 3,
-      'imageUrl': 'https://d23vy2bv3rsfba.cloudfront.net/questoes_imagens/0_e7cb0be3c361a219750cfbd93320388a_1051193.jpg.png',
+      'answer': 1,
+      'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyx_Xp9Gp_7t8czZPo3VxBkJTr6lRhBUYKoA&s',
       'difficulty': 'easy',
       },
       {
-      'question': 'A estrela mais Proxima do Sol é',
+      'question': 'A estrela mais Próxima do Sol é',
       'options': ['Lua', 'Lalande 21185', 'Sirius', 'Ross 154'],
       'answer': 1,
       'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQruT802-ZMn5eJ9Sdr25h1DsyJ_3NmaVa9w&s',
@@ -135,7 +141,7 @@ class _QuizPageState extends State<QuizPage> {
       'difficulty': 'medium',
       },
       {
-      'question': 'um mapa de escala 1:50.000, uma cidade que tem 4,5 Km de extensão entre seus extremos será representada com',
+      'question': 'Em um mapa de escala 1:50.000, uma cidade que tem 4,5 km de extensão entre seus extremos será representada com:',
       'options': ['90 cm.', '9 cm.', '225 mm.', '11 mm.'],
       'answer': 0,
       'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3QUeRJ7FXwbP0d9PwQDFbpCY05Qj1le8KfQ&s',
@@ -149,7 +155,7 @@ class _QuizPageState extends State<QuizPage> {
       'difficulty': 'medium',
       },
       {
-      'question': 'de quem é essa silhueta',
+      'question': 'De quem é essa silhueta',
       'options': ['Alguma fela da puta das winx', 'Sandy', 'Sininho', 'Fada do dente'],
       'answer': 2,
       'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRu1Si2-z5LFqQKzJIDnAqlUKrgfp6c7LSt6Q&s',
@@ -158,12 +164,12 @@ class _QuizPageState extends State<QuizPage> {
       {
       'question': 'Qual das palavras abaixo é um adjetivo em inglês?',
       'options': ['Run', 'Quickly', 'Drink', 'Geek'],
-      'answer': 2,
+      'answer': 3,
       'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4YRNESMJi_RKBwA7FenYD9Rr7WvW8BpK6MA&s',
       'difficulty': 'medium',
       },
       {
-      'question': 'Componente do computador responsavel por guardar as informações passageiras',
+      'question': 'Componente do computador responsável por guardar as informações passageiras',
       'options': ['Memoria ram', 'Memoria Hd', 'Memoria Ssd', 'Memoria NvmE'],
       'answer': 0,
       'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRU_-LUu_teFd00NCRyoIytFY-Hdsp-pS6cyQ&s',
@@ -184,7 +190,7 @@ class _QuizPageState extends State<QuizPage> {
   'difficulty': 'easy',
 },
 {
-  'question': 'Quantos graus tem um ângulo reto?',
+  'question': 'Quantos graus tem um ângulo reto',
   'options': ['45', '60', '90', '180'],
   'answer': 2,
   'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRu2YX3skFQkalDCbxBu3_0Sp4VxTw8ydgNiQ&s',
@@ -264,20 +270,55 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void _answerQuestion(int selectedOption) {
-    final question = _questions[_currentQuestionIndex];
-    _timer.cancel(); // Cancela o timer assim que a resposta é dada
+  final question = _questions[_currentQuestionIndex];
+  _timer.cancel();
 
-    setState(() {
-      _selectedAnswerIndex = selectedOption;
-      if (selectedOption == question['answer']) {
-        _score++;
+  setState(() {
+    _selectedAnswerIndex = selectedOption;
+
+    // Verifica se a resposta está correta e ajusta a pontuação
+    if (selectedOption == question['answer']) {
+      String difficulty = question['difficulty'];
+      int baseScore;
+
+      // Define a pontuação base com base na dificuldade
+      if (difficulty == 'easy') {
+        baseScore = 1;
+      } else if (difficulty == 'medium') {
+        baseScore = 2;
+      } else {
+        baseScore = 3;
       }
-      _answered = true; // Marca como respondida
-    });
 
-    // Avança para a próxima pergunta após 2 segundos
-    Future.delayed(Duration(seconds: 2), _nextQuestion);
-  }
+      // Penalização com base no tempo restante
+      int timePenalty = 0;
+      if (_timeLeft < 5) {
+        timePenalty = -1; // Penaliza com 1 ponto se o tempo for menos de 5 segundos
+      } else if (_timeLeft < 10 && _timeLeft >=5) {
+        timePenalty = 0;
+      } else {
+        timePenalty = 1; // Dá um bônus de 1 ponto se o tempo restante for maior que 10 segundos
+      }
+
+      // A pontuação total é a soma da pontuação base + penalização
+      int finalScore = baseScore + timePenalty;
+      _score += finalScore.clamp(0, baseScore);
+
+      // Se a resposta for correta, aumenta o contador de acertos
+      if (selectedOption == question['answer']) {
+        _correctAnswers++;
+        _bonusPoints += timePenalty > 0 ? timePenalty : 0; // Adiciona apenas o bônus
+      }
+    }
+
+    _answered = true;
+  });
+
+  // Avança para a próxima pergunta após 2 segundos
+  Future.delayed(Duration(seconds: 2), _nextQuestion);
+}
+
+
 
   void _nextQuestion() {
     setState(() {
@@ -293,30 +334,43 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void _showScoreDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Quiz Concluído!'),
-        content: Text('Você acertou $_score de ${_questions.length} perguntas.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _resetQuiz();
-            },
-            child: Text('Tentar Novamente'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop(); // Volta para a tela inicial
-            },
-            child: Text('Sair'),
-          ),
-        ],
+  // Calcular o total de pontos (pontuação base + bônus)
+  int totalPoints = _score + _bonusPoints;
+
+  // Limitar a pontuação máxima a 80 pontos
+  totalPoints = totalPoints.clamp(0, 80);
+
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text('Quiz Concluído!'),
+      content: Text(
+        'Você acertou $_correctAnswers de ${_questions.length} perguntas.\n\n'
+        'Pontuação Total: $totalPoints pontos de 80.\n'
+        'Pontos bônus: $_bonusPoints pontos de 30.\n'
+        'Pontuação ajustada com base no tempo de resposta.',
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            _resetQuiz();
+          },
+          child: Text('Tentar Novamente'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop(); // Volta para a tela inicial
+          },
+          child: Text('Sair'),
+        ),
+      ],
+    ),
+  );
+}
+
+
 
   void _resetQuiz() {
     setState(() {
@@ -364,8 +418,8 @@ class _QuizPageState extends State<QuizPage> {
           if (question.containsKey('imageUrl'))
             Center(
               child: SizedBox(
-                width: 250, // Diminuindo o tamanho da imagem
-                height: 250, // Diminuindo o tamanho da imagem
+                width: 300, // Diminuindo o tamanho da imagem
+                height: 300, // Diminuindo o tamanho da imagem
                 child: Image.network(
                   question['imageUrl'],
                   fit: BoxFit.contain,

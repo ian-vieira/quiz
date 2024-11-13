@@ -36,13 +36,16 @@ class InformacoesPage extends StatelessWidget {
             Text('1- Questão facil ganha 1 ponto',style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 163, 53, 45)),),
             SizedBox(height: 20,),
 
-            Text('2- Questão difícil ganha 2 pontos',style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 163, 53, 45)),),
+            Text('2- Questão media ganha 2 pontos',style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 163, 53, 45)),),
             SizedBox(height: 20,),
 
-            Text('3- Quem tiver mais pontos ganha',style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 163, 53, 45)),),
+            Text('3- Responder faltando 5 segundo perde 1 ponto. Responder faltando 10 segundos não a perda de pontos. Responder acima de 10 segundos ganha 1 ponto',style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 163, 53, 45)),),
             SizedBox(height: 20,),
 
-            Text('4- Sem choro! O Quiz é sobre tudo!. Se voce não acertar pelo menos uma questão, você é burro',style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 163, 53, 45)),),
+            Text('4- Maximo de pontos é 80, sendo 50 em questões e 30 extras ',style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 163, 53, 45)),),
+            SizedBox(height: 20,),
+
+            Text('5- Sem choro! O Quiz é sobre tudo!. Se voce não acertar pelo menos uma questão, você é burro',style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 163, 53, 45)),),
             SizedBox(height: 20,),
 
             ElevatedButton(
