@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class QuizPage extends StatefulWidget {
   @override
@@ -9,16 +10,12 @@ class QuizPage extends StatefulWidget {
 class _QuizPageState extends State<QuizPage> {
   int _currentQuestionIndex = 0;
   int _score = 0;
-  int _correctAnswers = 0; // Contador de acertos
-  int _bonusPoints = 0; // Pontos bônus baseados no tempo
+  int _correctAnswers = 0;
+  int _bonusPoints = 0;
   bool _answered = false;
   int? _selectedAnswerIndex;
   late Timer _timer;
   int _timeLeft = 20;
-
-  // Questões do quiz...
-
-
 
   final List<Map<String, dynamic>> _questions = [
     {
@@ -235,6 +232,7 @@ class _QuizPageState extends State<QuizPage> {
       
   ];
 
+
   @override
   void initState() {
     super.initState();
@@ -242,11 +240,9 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void _startTimer() {
-    // Define o tempo de resposta baseado na dificuldade da questão
     String difficulty = _questions[_currentQuestionIndex]['difficulty'];
     _timeLeft = difficulty == 'easy' ? 20 : 30;
 
-    // Inicia o timer
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         if (_timeLeft > 0) {
@@ -259,74 +255,64 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void _timeUp() {
-    // Se o tempo acabar, considera a pergunta como respondida automaticamente
-    _timer.cancel(); // Cancela o timer
+    _timer.cancel();
     setState(() {
       _answered = true;
     });
 
-    // Avançar para a próxima pergunta após 2 segundos
     Future.delayed(Duration(seconds: 2), _nextQuestion);
   }
 
   void _answerQuestion(int selectedOption) {
-  final question = _questions[_currentQuestionIndex];
-  _timer.cancel();
+    final question = _questions[_currentQuestionIndex];
+    _timer.cancel();
 
-  setState(() {
-    _selectedAnswerIndex = selectedOption;
+    setState(() {
+      _selectedAnswerIndex = selectedOption;
 
-    // Verifica se a resposta está correta e ajusta a pontuação
-    if (selectedOption == question['answer']) {
-      String difficulty = question['difficulty'];
-      int baseScore;
-
-      // Define a pontuação base com base na dificuldade
-      if (difficulty == 'easy') {
-        baseScore = 1;
-      } else if (difficulty == 'medium') {
-        baseScore = 2;
-      } else {
-        baseScore = 3;
-      }
-
-      // Penalização com base no tempo restante
-      int timePenalty = 0;
-      if (_timeLeft < 5) {
-        timePenalty = -1; // Penaliza com 1 ponto se o tempo for menos de 5 segundos
-      } else if (_timeLeft < 10 && _timeLeft >=5) {
-        timePenalty = 0;
-      } else {
-        timePenalty = 1; // Dá um bônus de 1 ponto se o tempo restante for maior que 10 segundos
-      }
-
-      // A pontuação total é a soma da pontuação base + penalização
-      int finalScore = baseScore + timePenalty;
-      _score += finalScore.clamp(0, baseScore);
-
-      // Se a resposta for correta, aumenta o contador de acertos
       if (selectedOption == question['answer']) {
-        _correctAnswers++;
-        _bonusPoints += timePenalty > 0 ? timePenalty : 0; // Adiciona apenas o bônus
+        String difficulty = question['difficulty'];
+        int baseScore;
+
+        if (difficulty == 'easy') {
+          baseScore = 1;
+        } else if (difficulty == 'medium') {
+          baseScore = 2;
+        } else {
+          baseScore = 3;
+        }
+
+        int timePenalty = 0;
+        if (_timeLeft < 5) {
+          timePenalty = -1;
+        } else if (_timeLeft < 10 && _timeLeft >= 5) {
+          timePenalty = 0;
+        } else {
+          timePenalty = 1;
+        }
+
+        int finalScore = baseScore + timePenalty;
+        _score += finalScore.clamp(0, baseScore);
+
+        if (selectedOption == question['answer']) {
+          _correctAnswers++;
+          _bonusPoints += timePenalty > 0 ? timePenalty : 0;
+        }
       }
-    }
 
-    _answered = true;
-  });
+      _answered = true;
+    });
 
-  // Avança para a próxima pergunta após 2 segundos
-  Future.delayed(Duration(seconds: 2), _nextQuestion);
-}
-
-
+    Future.delayed(Duration(seconds: 2), _nextQuestion);
+  }
 
   void _nextQuestion() {
     setState(() {
       if (_currentQuestionIndex < _questions.length - 1) {
         _currentQuestionIndex++;
-        _answered = false; // Permite responder a nova pergunta
-        _selectedAnswerIndex = null; // Reseta a resposta selecionada
-        _startTimer(); // Inicia o timer para a próxima pergunta
+        _answered = false;
+        _selectedAnswerIndex = null;
+        _startTimer(); // Reiniciar o cronômetro para a próxima questão
       } else {
         _showScoreDialog();
       }
@@ -334,57 +320,57 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void _showScoreDialog() {
-  // Calcular o total de pontos (pontuação base + bônus)
-  int totalPoints = _score + _bonusPoints;
+    int totalPoints = _score + _bonusPoints;
+    totalPoints = totalPoints.clamp(0, 80);
 
-  // Limitar a pontuação máxima a 80 pontos
-  totalPoints = totalPoints.clamp(0, 80);
-
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: Text('Quiz Concluído!'),
-      content: Text(
-        'Você acertou $_correctAnswers de ${_questions.length} perguntas.\n\n'
-        'Pontuação Total: $totalPoints pontos de 80.\n'
-        'Pontos bônus: $_bonusPoints pontos de 30.\n'
-        'Pontuação ajustada com base no tempo de resposta.',
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Quiz Concluído!'),
+        content: Text(
+          'Você acertou $_correctAnswers de ${_questions.length} perguntas.\n\n'
+          'Pontuação Total: $totalPoints pontos de 80.\n'
+          'Pontos bônus: $_bonusPoints pontos de 30.\n'
+          'Pontuação ajustada com base no tempo de resposta.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _resetQuiz();
+            },
+            child: Text('Tentar Novamente'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+            child: Text('Sair'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-            _resetQuiz();
-          },
-          child: Text('Tentar Novamente'),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pop(); // Volta para a tela inicial
-          },
-          child: Text('Sair'),
-        ),
-      ],
-    ),
-  );
-}
-
-
+    );
+  }
 
   void _resetQuiz() {
+    // Cancelar o timer atual e reiniciar
+    _timer.cancel();
     setState(() {
       _score = 0;
+      _correctAnswers = 0;
+      _bonusPoints = 0;
       _currentQuestionIndex = 0;
-      _answered = false; // Reseta o estado de resposta
-      _selectedAnswerIndex = null; // Reseta a resposta selecionada
-      _timeLeft = 20; // Reseta o tempo
+      _answered = false;
+      _selectedAnswerIndex = null;
+      _timeLeft = 20; // Reiniciar o tempo com base na dificuldade (20 segundos por padrão)
     });
+
+    _startTimer(); // Reiniciar o cronômetro
   }
 
   @override
   void dispose() {
-    // Cancela o timer quando o widget for removido da árvore
     _timer.cancel();
     super.dispose();
   }
@@ -392,8 +378,10 @@ class _QuizPageState extends State<QuizPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFADD8E6),
       appBar: AppBar(
         title: Text('Quiz App'),
+        backgroundColor: Colors.blue,
       ),
       body: _currentQuestionIndex < _questions.length
           ? _buildQuizQuestion()
@@ -412,71 +400,139 @@ class _QuizPageState extends State<QuizPage> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Imagem da pergunta (se existir)
           if (question.containsKey('imageUrl'))
             Center(
               child: SizedBox(
-                width: 300, // Diminuindo o tamanho da imagem
-                height: 300, // Diminuindo o tamanho da imagem
+                width: 400,
+                height: 400,
                 child: Image.network(
                   question['imageUrl'],
                   fit: BoxFit.contain,
                 ),
               ),
             ),
-          SizedBox(height: 20), // Espaço entre a imagem e o cronômetro
+          SizedBox(height: 20),
 
-          // Cronômetro (Tempo restante)
-          Text(
-            'Tempo Restante: $_timeLeft segundos',
-            style: TextStyle(fontSize: 18, color: Colors.red),
-            textAlign: TextAlign.center,
+          // Cronômetro circular sem texto fora
+          CustomPaint(
+            size: Size(80, 80),  // Reduzir ainda mais o tamanho do cronômetro
+            painter: TimerPainter(
+              timeLeft: _timeLeft,
+            ),
           ),
-          SizedBox(height: 20), // Espaço entre o cronômetro e a pergunta
+          
+          SizedBox(height: 20),
 
-          // Exibe o número da questão e a pergunta na mesma linha
-          Row(
-            children: [
-              Text(
-                'Questão ${_currentQuestionIndex + 1}: ',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Expanded(
-                child: Text(
+          Align(
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                Text(
+                  'Questão ${_currentQuestionIndex + 1}:',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                Text(
                   question['question'],
                   style: TextStyle(fontSize: 18),
-                  softWrap: true, // Garante quebra de linha na pergunta se necessário
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          SizedBox(height: 20), // Espaço entre a pergunta e as opções de resposta
+          SizedBox(height: 20),
 
-          // Opções de respostas
           ...List.generate(question['options'].length, (index) {
             final isCorrect = index == question['answer'];
             final isSelected = index == _selectedAnswerIndex;
 
-            return ElevatedButton(
-              onPressed: _answered
-                  ? null
-                  : () => _answerQuestion(index), // Desabilita quando já respondido
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(
-                  _answered
-                      ? (isSelected
-                          ? (isCorrect ? Colors.green : Colors.red)
-                          : (isCorrect ? Colors.green : Colors.grey)) // Se for correto e não selecionado, fica verde
-                      : Colors.white, // Cor padrão enquanto não respondido
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ElevatedButton(
+                onPressed: _answered ? null : () => _answerQuestion(index),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    _answered
+                        ? (isSelected
+                            ? (isCorrect ? Colors.green : Colors.red)
+                            : (isCorrect ? Colors.green : Colors.grey))
+                        : Colors.yellow[700],
+                  ),
+                  minimumSize: MaterialStateProperty.all(Size(150, 45)),
+                ),
+                child: Text(
+                  question['options'][index],
+                  style: TextStyle(color: Colors.black),
                 ),
               ),
-              child: Text(question['options'][index]),
             );
           }),
         ],
       ),
     );
+  }
+}
+
+class TimerPainter extends CustomPainter {
+  final int timeLeft;
+
+  TimerPainter({required this.timeLeft});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint circlePaint = Paint()
+      ..color = _getColor(timeLeft)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6;
+
+    final Paint backgroundPaint = Paint()
+      ..color = Colors.grey[300]!
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6;
+
+    // Desenha o círculo de fundo
+    canvas.drawCircle(size.center(Offset.zero), size.width / 2, backgroundPaint);
+
+    // Desenha o círculo com base no tempo restante
+    double progress = (timeLeft / 30).clamp(0.0, 1.0); // Ajuste para o tempo
+    double sweepAngle = 2 * pi * progress;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: size.center(Offset.zero), radius: size.width / 2),
+      -pi / 2, // Iniciar no topo
+      sweepAngle,
+      false,
+      circlePaint,
+    );
+
+    // Desenha o texto com o tempo restante
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '$timeLeft',
+        style: TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.bold),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: size.width);
+
+    textPainter.paint(canvas, size.center(Offset.zero) - Offset(textPainter.width / 2, textPainter.height / 2));
+  }
+
+  Color _getColor(int timeLeft) {
+    if (timeLeft <= 5) {
+      return Colors.red;
+    } else if (timeLeft <= 10) {
+      return Colors.yellow;
+    } else {
+      return Colors.green;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }
