@@ -153,7 +153,7 @@ class _QuizPageState extends State<QuizPage> {
       },
       {
       'question': 'De quem é essa silhueta',
-      'options': ['Alguma fela da puta das winx', 'Sandy', 'Sininho', 'Fada do dente'],
+      'options': ['Alguma das winx', 'Sandy', 'Sininho', 'Fada do dente'],
       'answer': 2,
       'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRu1Si2-z5LFqQKzJIDnAqlUKrgfp6c7LSt6Q&s',
       'difficulty': 'esay',
@@ -303,7 +303,7 @@ class _QuizPageState extends State<QuizPage> {
       _answered = true;
     });
 
-    Future.delayed(Duration(seconds: 2), _nextQuestion);
+    Future.delayed(Duration(seconds: 0), _nextQuestion);
   }
 
   void _nextQuestion() {
@@ -319,39 +319,50 @@ class _QuizPageState extends State<QuizPage> {
     });
   }
 
-  void _showScoreDialog() {
-    int totalPoints = _score + _bonusPoints;
-    totalPoints = totalPoints.clamp(0, 80);
+void _showScoreDialog() {
+  int totalPoints = _score + _bonusPoints;
+  totalPoints = totalPoints.clamp(0, 80);
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Quiz Concluído!'),
-        content: Text(
-          'Você acertou $_correctAnswers de ${_questions.length} perguntas.\n\n'
-          'Pontuação Total: $totalPoints pontos de 80.\n'
-          'Pontos bônus: $_bonusPoints pontos de 30.\n'
-          'Pontuação ajustada com base no tempo de resposta.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _resetQuiz();
-            },
-            child: Text('Tentar Novamente'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: Text('Sair'),
-          ),
-        ],
-      ),
-    );
+  String performance;
+  if (totalPoints < 40) {
+    performance = 'Desempenho Ruim';
+  } else if (totalPoints >= 40 && totalPoints < 60) {
+    performance = 'Desempenho Médio';
+  } else {
+    performance = 'Desempenho Bom';
   }
+
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text('Quiz Concluído!'),
+      content: Text(
+        'Você acertou $_correctAnswers de ${_questions.length} perguntas.\n\n'
+        'Pontuação Total: $totalPoints pontos de 80.\n'
+        'Pontos bônus: $_bonusPoints pontos de 30.\n'
+        'Pontuação ajustada com base no tempo de resposta.\n\n'
+        'Avaliação: $performance',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            _resetQuiz();
+          },
+          child: Text('Tentar Novamente'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+          child: Text('Sair'),
+        ),
+      ],
+    ),
+  );
+}
+
 
   void _resetQuiz() {
     // Cancelar o timer atual e reiniciar
@@ -413,7 +424,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
             ),
-          SizedBox(height: 1),
+          SizedBox(height: 10),
 
           // Cronômetro circular sem texto fora
           CustomPaint(
