@@ -405,25 +405,25 @@ class _QuizPageState extends State<QuizPage> {
           if (question.containsKey('imageUrl'))
             Center(
               child: SizedBox(
-                width: 400,
-                height: 400,
+                width: 250,
+                height: 250,
                 child: Image.network(
                   question['imageUrl'],
                   fit: BoxFit.contain,
                 ),
               ),
             ),
-          SizedBox(height: 20),
+          SizedBox(height: 1),
 
           // Cronômetro circular sem texto fora
           CustomPaint(
-            size: Size(80, 80),  // Reduzir ainda mais o tamanho do cronômetro
+            size: Size(30, 30),  // Reduzir ainda mais o tamanho do cronômetro
             painter: TimerPainter(
               timeLeft: _timeLeft,
             ),
           ),
           
-          SizedBox(height: 20),
+          SizedBox(height: 10),
 
           Align(
             alignment: Alignment.center,
@@ -443,7 +443,7 @@ class _QuizPageState extends State<QuizPage> {
               ],
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 10),
 
           ...List.generate(question['options'].length, (index) {
             final isCorrect = index == question['answer'];
@@ -461,7 +461,7 @@ class _QuizPageState extends State<QuizPage> {
                             : (isCorrect ? Colors.green : Colors.grey))
                         : Colors.yellow[700],
                   ),
-                  minimumSize: MaterialStateProperty.all(Size(150, 45)),
+                  minimumSize: MaterialStateProperty.all(Size(150, 10)),
                 ),
                 child: Text(
                   question['options'][index],
