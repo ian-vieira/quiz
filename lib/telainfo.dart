@@ -50,7 +50,7 @@ class InformacoesPage extends StatelessWidget {
 
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); // Volta para a tela inicial
+                Navigator.pop(context); 
               },
               child: Text('Voltar'),
             ),
