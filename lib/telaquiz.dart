@@ -312,7 +312,7 @@ class _QuizPageState extends State<QuizPage> {
         _currentQuestionIndex++;
         _answered = false;
         _selectedAnswerIndex = null;
-        _startTimer(); // Reiniciar o cronômetro para a próxima questão
+        _startTimer(); 
       } else {
         _showScoreDialog();
       }
@@ -365,7 +365,7 @@ void _showScoreDialog() {
 
 
   void _resetQuiz() {
-    // Cancelar o timer atual e reiniciar
+  
     _timer.cancel();
     setState(() {
       _score = 0;
@@ -374,10 +374,10 @@ void _showScoreDialog() {
       _currentQuestionIndex = 0;
       _answered = false;
       _selectedAnswerIndex = null;
-      _timeLeft = 20; // Reiniciar o tempo com base na dificuldade (20 segundos por padrão)
+      _timeLeft = 20;
     });
 
-    _startTimer(); // Reiniciar o cronômetro
+    _startTimer(); 
   }
 
   @override
@@ -426,9 +426,9 @@ void _showScoreDialog() {
             ),
           SizedBox(height: 10),
 
-          // Cronômetro circular sem texto fora
+          
           CustomPaint(
-            size: Size(30, 30),  // Reduzir ainda mais o tamanho do cronômetro
+            size: Size(30, 30),  
             painter: TimerPainter(
               timeLeft: _timeLeft,
             ),
@@ -504,22 +504,22 @@ class TimerPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 6;
 
-    // Desenha o círculo de fundo
+ 
     canvas.drawCircle(size.center(Offset.zero), size.width / 2, backgroundPaint);
 
-    // Desenha o círculo com base no tempo restante
-    double progress = (timeLeft / 30).clamp(0.0, 1.0); // Ajuste para o tempo
+  
+    double progress = (timeLeft / 30).clamp(0.0, 1.0); 
     double sweepAngle = 2 * pi * progress;
 
     canvas.drawArc(
       Rect.fromCircle(center: size.center(Offset.zero), radius: size.width / 2),
-      -pi / 2, // Iniciar no topo
+      -pi / 2,
       sweepAngle,
       false,
       circlePaint,
     );
 
-    // Desenha o texto com o tempo restante
+   
     final textPainter = TextPainter(
       text: TextSpan(
         text: '$timeLeft',
